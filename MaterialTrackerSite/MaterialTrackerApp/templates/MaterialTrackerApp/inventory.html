@@ -17,16 +17,11 @@
     <div class="d-flex align-items-center justify-content-between gap-3 mb-0 mx-5">
       <h1 class="display-5 fw-bolder text-body-emphasis me-auto">Inventory</h1>
       <p class="datetime mb-0">Last update: {% now "Y-m-d H:i:s" %}</p>
-      <button type="button" class="btn btn-primary">Add item</button>
+      <a href="{% url 'MaterialTrackerApp:add_item' %}" class="btn btn-primary">Add item</a>
       <button type="button" class="btn btn-primary">Update selection</button>
-      <button type="button" class="btn btn-primary">Claim selection</button>
-      <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown10" data-toggle="dropdown"
-        aria-haspopup="true" aria-expanded="false">Dropdown</a>
-      <div class="dropdown-menu" aria-labelledby="dropdown10">
-        <a class="dropdown-item" href="#">Action</a>
-        <a class="dropdown-item" href="#">Another action</a>
-        <a class="dropdown-item" href="#">Something else here</a>
-      </div>
+      <a href="{% url 'MaterialTrackerApp:new_request_view' %}">
+        <button type="button" class="btn btn-primary">Request selection</button>
+      </a>
     </div>
 
     <hr />
@@ -35,13 +30,17 @@
       <table class="table table-striped table-sm">
         <thead>
           <tr>
-            <th scope="col"></th>
+            <th scope="col">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+              </div>
+            </th>
             <th scope="col">
               <div class="dropdown text-end">
                 <a href="#"
                   class="d-block link-body-emphasis text-decoration-none dropdown-toggle d-flex align-items-center"
                   data-bs-toggle="dropdown" aria-expanded="false">
-                  <span>Photo</span>
+                  <span>Description</span>
                 </a>
 
                 <ul class="dropdown-menu text-small">
@@ -60,7 +59,6 @@
                 </ul>
               </div>
             </th>
-            <th scope="col">Description</th>
             <th scope="col">Quantity</th>
             <th scope="col">Owner</th>
             <th scope="col">Cost</th>

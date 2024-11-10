@@ -60,12 +60,12 @@ body {
 }
 
 .dev_nav-link:hover {
-    color: #9b1414;
+    color: #0081c6;
     transform: scale(1.05); 
 }
 
 .dev_nav-link:active {
-    color: #9b1414; 
+    color: #0081c6; 
     transform: scale(0.95); 
 }
 
@@ -76,7 +76,7 @@ body {
 .user-info {
     margin-left: auto;        /* Push user info to the right */
     font-weight: bold;        /* Make the text bold */
-    color: #9b1414;           /* Match the text color */
+    color: #0081c6;           /* Match the text color */
     display: flex;            /* Make the user info a flex container */
     align-items: center;      /* Center content vertically */
 }

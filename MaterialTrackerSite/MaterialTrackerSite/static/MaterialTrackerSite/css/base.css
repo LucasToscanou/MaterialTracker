@@ -29,7 +29,7 @@ input[type="text"],
 input[type="password"],
 input[type="email"], /* Add more input types if needed */
 input[type="submit"] {
-    background-color: #a23e3e; /* Change this to your desired color */
+    background-color: #00a2f9; /* Change this to your desired color */
     border: 1px solid #ccc; /* Optional: border styling */
     border-radius: 5px; /* Optional: rounded corners */
     padding: 10px; /* Optional: space inside the input */
@@ -43,13 +43,13 @@ input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus,
 input[type="submit"]:focus {
-    background-color: #a23e3e; /* Change to a different color when focused */
+    background-color: #00a2f9; /* Change to a different color when focused */
     outline: none; /* Optional: removes the default outline */
 }
 
 /* Style for the submit button */
 input[type="submit"] {
-    background-color: #9b1414; /* Change this to your desired button color */
+    background-color: #0081c6; /* Change this to your desired button color */
     color: #fff; /* Text color */
     cursor: pointer; /* Changes the cursor to a pointer on hover */
     transition: background-color 0.3s; /* Smooth transition for hover effect */
@@ -74,7 +74,7 @@ h2 {
 }
 
 .dev_nav-button {
-    background-color: #9b1414; /* Default button color */
+    background-color: #0081c6; /* Default button color */
     color: white; /* Text color */
     border: none; /* Remove default border */
     border-radius: 5px; /* Rounded corners */

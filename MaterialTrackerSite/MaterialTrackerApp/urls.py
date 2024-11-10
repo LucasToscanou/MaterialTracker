@@ -11,5 +11,8 @@ urlpatterns = [
     path('inventory/', views.InventoryView.as_view(), name='inventory'),
     path('about/', views.about, name='about'),
     path('project/', views.project, name='project'),
-
+    path('add_item/', views.add_item, name='add_item'),
+    path('new_request_view/', views.new_request_view, name='new_request_view'),
+    path('new_request_finish/', views.new_request_finish, name='new_request_finish'),
+    path('new_request_result/', views.new_request_result, name='new_request_result'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
