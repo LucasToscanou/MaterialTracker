@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/MaterialTrackerApp/favicon.ico' %}" type="image/x-icon">
+    <title>Index</title>
+    <link rel="stylesheet" href="{% static 'css/MaterialTrackerApp/index.css' %}">
+
+    {% include 'MaterialTrackerApp/head.html' %}
+</head>
+
+<body>
+    <div class="d-flex flex-column min-vh-100 w-100 mx-1">
+        {% include 'MaterialTrackerApp/links.html' %}
+
+        <div class="flex-grow-1 d-flex index-hero align-items-center justify-content-center w-100 ">
+            <div class="text-center  w-100 index-hero-text">
+                <!-- <img class="d-block mx-auto mb-4" src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
+                <h1 class="display-1 fw-bolder text-body-emphasis">Material Tracker</h1>
+                <div class="col-lg-6 mx-auto">
+                    <p class="display-5 fw-bold mb-4 text-body-emphasis">Store, Find, Book</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'MaterialTrackerApp:inventory' %}">
+                            <button type="button" class="btn btn-primary btn-lg px-4">Go to inventory</button>
+                        </a>
+                        {% else %}
+                        <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Sign in</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include 'MaterialTrackerApp/footer.html' %}
+
+    </div>
+
+
+
+
+
+
+</body>
+
+</html>

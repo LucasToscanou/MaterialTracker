@@ -1,0 +1,50 @@
+{% load static %}
+<header class="p-3 mb-3 border-bottom">
+
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/">
+                <img src="{% static 'img/MaterialTrackerApp/mt_logo_no_bkg.png' %}" alt="Material Tracker" height="40">
+            </a>
+            
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 ms-3">
+                <li><a href="/" class="nav-link px-2 link-body-emphasis">Home</a></li>
+                <li><a href="{% url 'MaterialTrackerApp:inventory' %}" class="nav-link px-2 link-body-emphasis">Inventory</a></li>
+                <li><a href="{% url 'MaterialTrackerApp:project' %}" class="nav-link px-2 link-body-emphasis">Project</a></li>
+                <li><a href="{% url 'MaterialTrackerApp:about' %}" class="nav-link px-2 link-body-emphasis">About</a></li>
+            </ul>
+            
+
+
+
+            <div class="dropdown text-end">
+                <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle d-flex align-items-center"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if user.is_authenticated %}
+                    <img src="{{ user.userprofile.avatar.url }}" alt="profile photo" width="32" height="32" class="rounded-circle me-2">
+                    <span>{{ user.get_username }}</span>
+                    {% else %}
+                    <img src="{% static 'img/MaterialTrackerApp/generic_user.png' %}" alt="generic user" width="32" height="32"
+                        class="rounded-circle me-2">
+                    {% endif %}
+                </a>
+            
+                <ul class="dropdown-menu text-small">
+                    {% if user.is_authenticated %}
+                    <li><a class="dropdown-item" href="#">New project...</a></li>
+                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><a class="dropdown-item" href="{% url 'sec-user_page' %}">Profile</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}">Sign out</a></li>
+                    {% else %}
+                    <li><a class="dropdown-item" href="{% url 'sec-login' %}">Sign in</a></li>
+                    <li><a class="dropdown-item" href="{% url 'register' %}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+</header>
