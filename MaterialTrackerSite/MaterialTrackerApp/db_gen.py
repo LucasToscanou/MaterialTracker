@@ -1,16 +1,28 @@
 from django.contrib import admin
-from MaterialTrackerApp.models import *
+from models import *
 from random import *
+import os
 
 projs = Project.objects.all()
-items = []
+locations = Location.objects.all()
+capacities = [20, 30, 40, 50, 60, 70, 80, 90, 100] 
+imgs = os.listdir("./static/img/MaterialTrackerApp/material")
+currencies = Currency.objects.all()
 
-counter = 0
-for proj in projs:
-    for i in range(counter, counter + 10):
-        items.append(Item(name=f"Item {i}", description=f"Description {i}", project=proj))
-    counter = counter + 10
-    print(counter)
+upper_bound = 100
+for i in range(0, upper_bound):
+    Material.objects.create(
+        ref=f"ABC_{randint(1, upper_bound)}",
+        descritpion=f"Description {i}",
+        capacity=choice(capacities),
+        
+        project=choice(projs),
+        main_img=choice(imgs),
+        current_location=choice(locations),
+        quality_exp_date=timezone.now(),
+        cost=random(100, 10000),
+        currency=choice(currencies),
 
-# Bulk create all items in a single query
-Item.objects.bulk_create(items)
+        created_at=timezone.now(),
+        updated_at=timezone.now()
+    )

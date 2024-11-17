@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Item</title>
+  <link rel="stylesheet" href="{% static 'css/MaterialTrackerApp/index.css' %}">
+
+  {% include 'MaterialTrackerApp/head.html' %}
+</head>
+
+<body>
+  <div class="content">
+    {% include 'MaterialTrackerApp/links.html' %}
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-0 mx-5">
+      <h1 class="display-5 fw-bolder text-body-emphasis me-auto">Inventory - add item</h1>
+      <p class="datetime mb-0">Last update: {% now "Y-m-d H:i:s" %}</p>
+      <button type="button" class="btn btn-primary">Add item</button>
+      <button type="button" class="btn btn-primary">Update selection</button>
+    </div>
+
+    <hr />
+
+    <div class="container">
+      <main>
+        <div class="row g-5">
+
+          <div class="col-md-7 col-lg-8">
+            <h4 class="mb-3">Item details</h4>
+              <h5>Add item success!</h5>
+          </div>
+        </div>
+      </main>
+    </div>
+    {% include 'MaterialTrackerApp/footer.html' %}
+
+
+
+
+  </div>
+</body>
+
+</html>

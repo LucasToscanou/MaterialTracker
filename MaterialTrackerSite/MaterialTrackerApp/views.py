@@ -7,10 +7,11 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import View
+from django.contrib import messages 
 
 from MaterialTrackerApp.models import *
 from django.urls import reverse
-
+from random import *
 
 def index(request):
     return render(request, 'MaterialTrackerApp/index.html')
@@ -27,19 +28,65 @@ class InventoryView(LoginRequiredMixin, View):
 
 
     def get(self, request):
-        items = Item.objects.all()
+        materials = Material.objects.all()
         context = {
-            'items': items
+            'materials': materials,
+            'columns': ["Ref", "Description", "Capacity", "Project", "Location", "Quality Exp Date", "Cost"]
         }
-        for i in items:
-            print(i.name)
         return render(request, self.template_name, context)
+    
+    def post(self, request):
+
+        if request.POST['action'] == 'request':
+            return render(request, 'MaterialTrackerApp/new_request.html')
+        
+        elif request.POST['action'] == 'edit':
+            print("Editing")
+            material_id = request.POST['id']
+            return redirect('MaterialTrackerApp:edit_item', pk=material_id)
+
+        elif  request.POST['action'] == 'delete':
+            print("Deleting")
+            print(request.POST['id'])
+            Material.objects.filter(pk=request.POST['id']).delete()
+            return redirect('MaterialTrackerApp:inventory')
+        
+        elif request.POST['action'] == 'restart_db':
+            from django.contrib import admin
+            import os
+
+            projs = Project.objects.all()
+            locations = Location.objects.all()
+            capacities = [20, 30, 40, 50, 60, 70, 80, 90, 100]
+            print("curr_dir = " + os.getcwd())
+            imgs = os.listdir("./MaterialTrackerApp/static/img/MaterialTrackerApp/material")
+            currencies = Currency.objects.all()
+
+            upper_bound = 100
+            Material.objects.all().delete()
+            for i in range(0, upper_bound):
+                Material.objects.create(
+                    ref=f"ABC_{i}",
+                    description=f"Description {i}",
+                    capacity=choice(capacities),
+                    
+                    project=choice(projs),
+                    main_img=choice(imgs),
+                    current_location=choice(locations),
+                    quality_exp_date=timezone.now(),
+                    cost=randrange(100, 10000),
+                    currency=choice(currencies),
+
+                    created_at=timezone.now(),
+                    updated_at=timezone.now()
+                )
+
+            return redirect('MaterialTrackerApp:inventory')
 
 
 @login_required
 def add_item(request):
     if request.method == 'GET':
-        items = Item.objects.all()
         projects = Project.objects.all()
         locations = Location.objects.all()
         
@@ -47,31 +94,97 @@ def add_item(request):
             'currencies': Currency.objects.all(),
             'projects': projects,
             'locations': locations,
+            'capacities': [20, 30, 40, 50, 60, 70, 80, 90, 100],
         }
         return render(request, 'MaterialTrackerApp/add_item.html', context)
     elif request.method == 'POST':
-        form = Item(request.POST)
-        if form.is_valid():
-            item = form.save(commit=False)
-            item.save()
-            return redirect('inventory')
+        # Get data from the POST request
+        reference = request.POST.get('reference')
+        description = request.POST.get('description')
+        capacity = request.POST.get('capacity')
+        project = Project.objects.get(id=request.POST.get('project'))
+        location = Location.objects.get(id=request.POST.get('curr_location'))
+        cost = request.POST.get('cost')
+        currency = Currency.objects.get(id=request.POST.get('currency'))
+        quality_exp_date = request.POST.get('quality_exp_date')
+        photo = request.FILES.get('photo')  # Assuming photo is uploaded as a file
+
+        print("reference = " + str(reference))
+        print("description = " + str(description))
+        print("capacity = " + str(capacity))
+        print("project = " + str(project))
+        print("location = " + str(location))
+        print("cost = " + str(cost))
+        print("currency = " + str(currency))
+        print("quality_exp_date = " + str(quality_exp_date))
+        print("photo = " + str(photo))
+
+        # Validate the required fields
+        if not reference or not description or not capacity or not project:
+            messages.error(request, "Please fill out all required fields.")
+            return  render(request, 'MaterialTrackerApp/add_item_fail.html')
+        
+        # Create a new Item instance and save it to the database
+        material = Material(
+            ref=reference,
+            description=description,
+            capacity=capacity,
+            project=project,
+            current_location=location,
+            cost=cost,
+            currency=currency,
+            quality_exp_date=quality_exp_date,
+            main_img=photo
+        )
+        material.save()
+
+        messages.success(request, "Item created successfully!")
+        return render(request, 'MaterialTrackerApp/add_item_success.html')
+        
+
     else:
-        form = Item()
-    return render(request, 'MaterialTrackerApp/add_item.html', {'form': form})
+        print("erro")
+
+@login_required
+def edit_item(request, pk):
+
+    if request.method == 'GET':
+        material =get_object_or_404(Material, pk=pk)
+        projects = Project.objects.all()
+        locations = Location.objects.all()
+        currencies = Currency.objects.all()
+        context = {
+            'material': material,
+            'projects': projects,
+            'locations': locations,
+            'currencies': currencies,
+            'capacities': [20, 30, 40, 50, 60, 70, 80, 90, 100],
+        }
+
+        return render(request, 'MaterialTrackerApp/edit_item.html', context)
+    # elif request.method == 'POST':
+
+@login_required
+def add_item_success(request):
+    return render(request, 'MaterialTrackerApp/add_item_success.html')
+
+def add_item_fail(request):
+    return render(request, 'MaterialTrackerApp/add_item_fail.html')
+
 
 @login_required
 def new_request_finish(request):
     if request.method == 'GET':
-        items = Item.objects.all()
+        materials = Material.objects.all()
 
-        items_summary = {}
-        for p in items.values('project').distinct():
+        materials_summary = {}
+        for p in materials.values('project').distinct():
             project = Project.objects.get(pk=p['project'])
             
-            items_summary[project.name] = {}
-            items_summary[project.name]['items'] = []
-            items_summary[project.name]['qty'] = 0
-            items_summary[project.name]['cost'] = {
+            materials_summary[project.name] = {}
+            materials_summary[project.name]['items'] = []
+            materials_summary[project.name]['qty'] = 0
+            materials_summary[project.name]['cost'] = {
                 'item': 0,
                 'transport': 0,
                 'storage': 0,
@@ -79,23 +192,23 @@ def new_request_finish(request):
                 'total_logistics': 0,
             }
 
-            for i in items.filter(project=project):
-                items_summary[project.name]['items'].append(i)
-                items_summary[project.name]['qty'] += 1
-                items_summary[project.name]['cost']['item'] += i.cost
-                items_summary[project.name]['cost']['transport'] += i.cost
-                items_summary[project.name]['cost']['storage'] += i.cost
-                items_summary[project.name]['cost']['transport'] += i.cost
-                items_summary[project.name]['cost']['total_logistics'] += items_summary[project.name]['cost']['transport'] + items_summary[project.name]['cost']['storage'] + items_summary[project.name]['cost']['customs']
+            for i in materials.filter(project=project):
+                materials_summary[project.name]['items'].append(i)
+                materials_summary[project.name]['qty'] += 1
+                materials_summary[project.name]['cost']['item'] += i.cost
+                materials_summary[project.name]['cost']['transport'] += i.cost
+                materials_summary[project.name]['cost']['storage'] += i.cost
+                materials_summary[project.name]['cost']['transport'] += i.cost
+                materials_summary[project.name]['cost']['total_logistics'] += materials_summary[project.name]['cost']['transport'] + materials_summary[project.name]['cost']['storage'] + materials_summary[project.name]['cost']['customs']
 
         total_cost = 0
-        for p in items_summary:
-            total_cost += items_summary[p]['cost']['item'] + items_summary[p]['cost']['total_logistics']
+        for p in materials_summary:
+            total_cost += materials_summary[p]['cost']['item'] + materials_summary[p]['cost']['total_logistics']
 
         projects = Project.objects.all()
         locations = Location.objects.all()
         context = {
-            'items_summary': items_summary,
+            'materials_summary': materials_summary,
             'projects': projects,
             'locations': locations,
             'total_cost': total_cost,
@@ -114,11 +227,11 @@ def new_request_finish(request):
 @login_required
 def new_request_view(request):
     if request.method == 'GET':
-        items = Item.objects.all()[:10]
+        materials = Material.objects.all()[:10]
         context = {
-            'items': items
+            'materials': materials
         }
-        for i in items:
+        for i in materials:
             print(i.name)
         return render(request, 'MaterialTrackerApp/new_request_view.html', context)
     # if request.method == 'POST':
@@ -135,11 +248,11 @@ def new_request_view(request):
 @login_required
 def new_request_result(request):
     if request.method == 'GET':
-        items = Item.objects.all()[:10]
+        materials = Material.objects.all()[:10]
         context = {
-            'items': items
+            'materials': materials
         }
-        for i in items:
+        for i in materials:
             print(i.name)
         return render(request, 'MaterialTrackerApp/new_request_result.html', context)
     # if request.method == 'POST':
