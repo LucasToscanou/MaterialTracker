@@ -20,8 +20,32 @@ def about(request):
     return render(request, 'MaterialTrackerApp/about.html')
 
 @login_required
-def project(request):
-    return render(request, 'MaterialTrackerApp/project.html')
+def project(request, current_project_pk=None):
+
+    if request.method == 'GET':
+        # If no project is selected, redirect to the first project the user is in
+        if not current_project_pk:
+            user_projects_id = ProjectUser.objects.filter(user=request.user).values_list('project', flat=True)
+            first_user_project = Project.objects.filter(pk__in=user_projects_id)[0]
+            return redirect('MaterialTrackerApp:project', current_project_pk=first_user_project.pk)
+        
+
+        materials = Material.objects.all()
+        user_projects_id = ProjectUser.objects.filter(user=request.user).values_list('project', flat=True)
+        other_user_projects = Project.objects.filter(pk__in=user_projects_id).exclude(pk=current_project_pk)
+
+        context = {
+            'materials': materials,
+            'current_project': Project.objects.get(pk=current_project_pk),
+            'other_user_projects': other_user_projects,
+            'columns': ["Ref", "Description", "Capacity", "Project", "Location", "Quality Exp Date", "Cost"]
+        }
+        return render(request, 'MaterialTrackerApp/project.html', context)
+
+    elif request.method == 'POST':
+        form_id = request.POST.get('form_id')
+        if form_id == 'project_choice_form':
+            return redirect('MaterialTrackerApp:project', current_project_pk=request.POST.get('selected_project'))
 
 class InventoryView(LoginRequiredMixin, View):
     template_name = 'MaterialTrackerApp/inventory.html'
@@ -89,58 +113,63 @@ def add_item(request):
     if request.method == 'GET':
         projects = Project.objects.all()
         locations = Location.objects.all()
-        
+        currency = Currency.objects.all()
+
         context = {
-            'currencies': Currency.objects.all(),
             'projects': projects,
             'locations': locations,
+            'currencies': currency,
             'capacities': [20, 30, 40, 50, 60, 70, 80, 90, 100],
         }
         return render(request, 'MaterialTrackerApp/add_item.html', context)
     elif request.method == 'POST':
-        # Get data from the POST request
-        reference = request.POST.get('reference')
-        description = request.POST.get('description')
-        capacity = request.POST.get('capacity')
-        project = Project.objects.get(id=request.POST.get('project'))
-        location = Location.objects.get(id=request.POST.get('curr_location'))
-        cost = request.POST.get('cost')
-        currency = Currency.objects.get(id=request.POST.get('currency'))
-        quality_exp_date = request.POST.get('quality_exp_date')
-        photo = request.FILES.get('photo')  # Assuming photo is uploaded as a file
+        if request.POST.get('action') == 'cancel':
+            return redirect('MaterialTrackerApp:inventory')
+        elif request.POST.get('action') == 'save':
+            # Get data from the POST request
+            reference = request.POST.get('reference')
+            description = request.POST.get('description')
+            capacity = request.POST.get('capacity')
+            project = Project.objects.get(id=request.POST.get('project'))
+            location = Location.objects.get(id=request.POST.get('current_location'))
+            cost = request.POST.get('cost')
+            currency = Currency.objects.get(id=request.POST.get('currency'))
+            quality_exp_date = request.POST.get('quality_exp_date')
+            photo = request.FILES.get('photo')  # Assuming photo is uploaded as a file
 
-        print("reference = " + str(reference))
-        print("description = " + str(description))
-        print("capacity = " + str(capacity))
-        print("project = " + str(project))
-        print("location = " + str(location))
-        print("cost = " + str(cost))
-        print("currency = " + str(currency))
-        print("quality_exp_date = " + str(quality_exp_date))
-        print("photo = " + str(photo))
+            print("reference = " + str(reference))
+            print("description = " + str(description))
+            print("capacity = " + str(capacity))
+            print("project = " + str(project))
+            print("location = " + str(location))
+            print("cost = " + str(cost))
+            print("currency = " + str(currency))
+            print("quality_exp_date = " + str(quality_exp_date))
+            print("photo = " + str(photo))
 
-        # Validate the required fields
-        if not reference or not description or not capacity or not project:
-            messages.error(request, "Please fill out all required fields.")
-            return  render(request, 'MaterialTrackerApp/add_item_fail.html')
-        
-        # Create a new Item instance and save it to the database
-        material = Material(
-            ref=reference,
-            description=description,
-            capacity=capacity,
-            project=project,
-            current_location=location,
-            cost=cost,
-            currency=currency,
-            quality_exp_date=quality_exp_date,
-            main_img=photo
-        )
-        material.save()
+            # Validate the required fields
+            if not reference or not description or not capacity or not project:
+                messages.error(request, "Please fill out all required fields.", extra_tags='latest')
+                return  render(request, 'MaterialTrackerApp/add_item.html')
+            
+            # Create a new Item instance and save it to the database
+            material = Material(
+                ref=reference,
+                description=description,
+                capacity=capacity,
+                project=project,
+                current_location=location,
+                cost=cost,
+                currency=currency,
+                quality_exp_date=quality_exp_date,
+                main_img=photo
+            )
+            material.save()
 
-        messages.success(request, "Item created successfully!")
-        return render(request, 'MaterialTrackerApp/add_item_success.html')
-        
+            messages.success(request, "Item created successfully!", extra_tags='latest')
+            return redirect('MaterialTrackerApp:inventory')
+        else:
+            print("POST error")
 
     else:
         print("erro")
@@ -162,7 +191,31 @@ def edit_item(request, pk):
         }
 
         return render(request, 'MaterialTrackerApp/edit_item.html', context)
-    # elif request.method == 'POST':
+    elif request.method == 'POST':
+        if request.POST.get('action') == 'cancel':
+            return redirect('MaterialTrackerApp:inventory')
+        elif request.POST.get('action') == 'save':
+            fields_to_update = {
+                'ref': request.POST.get('ref'),
+                'description': request.POST.get('description'),
+                'capacity': request.POST.get('capacity'),
+                'project': request.POST.get('project'),
+                'current_location': request.POST.get('current_location'),
+                'cost': request.POST.get('cost'),
+                'currency': request.POST.get('currency'),
+                'quality_exp_date': request.POST.get('quality_exp_date'),
+                'main_img': request.FILES.get('main_img'),
+                'updated_at': timezone.now()
+            }
+
+            # Filter out fields with None values
+            fields_to_update = {k: v for k, v in fields_to_update.items() if v is not None}
+
+            Material.objects.filter(pk=pk).update(**fields_to_update)
+
+
+            messages.success(request, "Item changed successfully!", extra_tags='latest')
+            return redirect('MaterialTrackerApp:inventory')
 
 @login_required
 def add_item_success(request):

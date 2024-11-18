@@ -2,9 +2,16 @@ html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow-y: auto;
-}
 
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+}
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+}
 
 body {
     font-family: 'Roboto', sans-serif;
@@ -14,30 +21,12 @@ body {
     background-position: center; */
     background-color: #fff;
 
-    display: flex;
+    display: block;
     justify-content: center;
     align-items: center;
     min-height: 100vh; /* Ensure the content is centered vertically */
 }
 
-.content {
-    background-color: #fff;
-    padding: 0px 30px;
-    text-align: center;
-    max-width: 100%;
-    width: 100%;
-    margin: 0;
-    min-height: 100vh; /* Ensures content area spans full height of viewport */
-    box-sizing: border-box; /* Includes padding within the width and height */
-    
-    max-height: 90vh; /* Leaves room for other page elements */
-    overflow-y: auto;
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-}
-.content::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and Opera */
-}
 
 .dev_navbar {
     background-color: #f8f9fa;

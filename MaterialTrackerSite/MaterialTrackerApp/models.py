@@ -20,6 +20,15 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+class ProjectUser(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.user.username} is in {self.project.name}"
+
 class Location(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)

@@ -1,7 +1,16 @@
 {% extends 'MaterialTrackerApp/item_base.html' %}
 {% load static %}
-{% block title %}Add Item{% endblock %}
-{% block subtitle %}add item{% endblock %}
+
+{% block head %}
+<title>Add Item</title>
+{% endblock %}
+{% block subtitle %}
+add item
+{% endblock %}
+
+{%block photo %}
+  <img src="{% static 'img/MaterialTrackerApp/generic_item.jpg' %}" alt="Material photo" class="img-thumbnail">
+{% endblock %}
 
 {%block field_reference %}{% endblock %}
 {%block field_description %}{% endblock %}
@@ -11,5 +20,8 @@
 {%block field_cost %}{% endblock %}
 {%block field_currency %}{% endblock %}
 {%block field_quality_exp_date %}{% endblock %}
-{%block submit_btn %}Add item{% endblock %}
+
+{%block submit_btn %}
+Add item
+{% endblock %}
 

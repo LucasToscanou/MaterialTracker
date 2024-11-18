@@ -1,105 +1,108 @@
+{% extends 'MaterialTrackerApp/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inventory</title>
-  <link rel="stylesheet" href="{% static 'css/MaterialTrackerApp/index.css' %}">
+{%block head %}
+<title>Inventory</title>
+{% endblock %}
 
-  {% include 'MaterialTrackerApp/head.html' %}
-</head>
 
-<body>
-  <div class="content">
-    {% include 'MaterialTrackerApp/links.html' %}
-    <div class="d-flex align-items-center justify-content-between gap-3 mb-0 mx-5">
-      <h1 class="display-5 fw-bolder text-body-emphasis me-auto">Inventory</h1>
-      <p class="datetime mb-0">Last update: {% now "Y-m-d H:i:s" %}</p>
-      <a href="{% url 'MaterialTrackerApp:add_item' %}" class="btn btn-primary">Add item</a>
-      <form method="post" action="">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary" name="action" value="restart_db">Restart Dabase</button>
-      </form>
+{% block content %}
 
-      <!-- <button type="submit" form="checkbox" class="btn btn-primary">Update selection</button>
+<div class="d-flex align-items-center justify-content-between gap-3 mb-0 mx-5">
+  <h1 class="display-5 fw-bolder text-body-emphasis me-auto">Inventory</h1>
+
+  {% if messages %}
+  {% for message in messages %}
+  {% if 'latest' in message.tags %}
+  <div
+    class="alert {% if 'success' in message.tags %}alert-success{% elif 'error' in message.tags %}alert-danger{% elif 'warning' in message.tags %}alert-warning{% else %}alert-info{% endif %}">
+    {{ message }}
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+
+
+
+
+  <p class="datetime mb-0">Last update: {% now "Y-m-d H:i:s" %}</p>
+  <a href="{% url 'MaterialTrackerApp:add_item' %}" class="btn btn-primary">Add item</a>
+  <form method="post" action="">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" name="action" value="restart_db">Restart Dabase</button>
+  </form>
+
+  <!-- <button type="submit" form="checkbox" class="btn btn-primary">Update selection</button>
       <a href="{% url 'MaterialTrackerApp:new_request_view' %}">
         <button type="button" class="btn btn-primary">Request selection</button>
       </a> -->
-    </div>
+</div>
 
-    <hr />
+<hr />
+<div class="table-responsive">
+  <table class="table table-striped table-sm table-hover">
+    <thead>
+      <tr>
 
-    <div class="table-responsive small">
-      <table class="table table-striped table-sm">
-        <thead>
-          <tr>
+        <th scope="col">Photo</th>
+
+        {% for col in columns %}
+        <th scope="col">
+          <div class="dropdown text-end">
+            <a href="#"
+              class="d-block link-body-emphasis text-decoration-none dropdown-toggle d-flex align-items-center"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <span>{{col}}</span>
+            </a>
+
+            <ul class="dropdown-menu text-small">
+              <li><a class="dropdown-item" href="#">Sort ascending</a></li>
+              <li><a class="dropdown-item" href="#">Sort descending</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <form class="dropdown-item d-flex align-items-center">
+                  <input type="text" class="form-control me-2" id="inlineFormInputName" placeholder="">
+                  <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
+              </li>
+            </ul>
             
-            <th scope="col">Photo</th>
-            
-            {% for col in columns %}
-            <th scope="col">
-              <div class="dropdown text-end">
-                <a href="#"
-                class="d-block link-body-emphasis text-decoration-none dropdown-toggle d-flex align-items-center"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <span>{{col}}</span>
-              </a>
-              
-              <ul class="dropdown-menu text-small">
-                <li><a class="dropdown-item" href="#">Sort ascending</a></li>
-                  <li><a class="dropdown-item" href="#">Sort descending</a></li>
-                  <li>
-                    <hr class="dropdown-divider">
-                  </li>
-                  <li>
-                    <form class="dropdown-item d-flex align-items-center">
-                      <input type="text" class="form-control me-2" id="inlineFormInputName" placeholder="">
-                      <button type="submit" class="btn btn-primary">Filter</button>
-                    </form>
-                  </li>
-                  
-                </ul>
-              </div>
-            </th>
-            {% endfor %}
-          
-            <th scope="col">
-            </th>
-          
-          </tr>
-        </thead>
-        <tbody>
-          {% for material in materials%}
-          <tr>
-            <td>
-              <img src="{{ material.main_img.url }}" class="border rounded" style="height: 100px;" alt="Material Image">
-            </td>
-            <td>{{material.ref}}</td>
-            <td>{{material.description}}</td>
-            <td>{{material.capacity}}</td>
-            <td>{{material.project}}</td>
-            <td>{{material.current_location}}</td>
-            <td>{{material.quality_exp_date}}</td>
-            <td>{{material.cost}} {{material.currency}}</td>
-            <td>
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="id" value="{{ material.pk }}">
-                <input type="submit" class="btn btn-secondary" id="edit-btn" name="action" value="edit">
-                <input type="submit" class="btn btn-secondary" id="edit-btn" name="action" value="request">
-                <input type="submit" class="btn btn-secondary" id="edit-btn" name="action" value="delete">
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+          </div>
+        </th>
+        {% endfor %}
 
-    {% include 'MaterialTrackerApp/footer.html' %}
-  </div>
-</body>
+        <th scope="col">
+        </th>
 
-</html>
+      </tr>
+    </thead>
+    <tbody>
+      {% for material in materials%}
+      <tr>
+        <td>
+          <img src="{{ material.main_img.url }}" class="border rounded" style="height: 100px;" alt="Material Image">
+        </td>
+        <td>{{material.ref}}</td>
+        <td>{{material.description}}</td>
+        <td>{{material.capacity}}</td>
+        <td>{{material.project}}</td>
+        <td>{{material.current_location}}</td>
+        <td>{{material.quality_exp_date}}</td>
+        <td>{{material.cost}} {{material.currency}}</td>
+        <td>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="id" value="{{ material.pk }}">
+            <input type="submit" class="btn btn-secondary" id="edit-btn" name="action" value="edit">
+            <input type="submit" class="btn btn-secondary" id="edit-btn" name="action" value="request">
+            <input type="submit" class="btn btn-secondary" id="edit-btn" name="action" value="delete">
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

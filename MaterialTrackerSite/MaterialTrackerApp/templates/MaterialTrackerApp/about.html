@@ -1,22 +1,12 @@
+{% extends 'MaterialTrackerApp/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{% static 'img/MaterialTrackerApp/favicon.ico' %}" type="image/x-icon">
-    <title>Index</title>
-    <link rel="stylesheet" href="{% static 'css/MaterialTrackerApp/index.css' %}">
 
-    {% include 'MaterialTrackerApp/head.html' %}
-</head>
-<body>
-    <div class="content">
-        {% include 'MaterialTrackerApp/links.html' %}
-        <h1>About</h1>
-        <p class="datetime">{% now "Y-m-d H:i:s" %}</p>
+{%block head %}
+<title>About</title>
+{% endblock %}
 
-        {% include 'MaterialTrackerApp/footer.html' %}
-    </div>
-</body>
-</html>
+{%block content %}
+<h1>About</h1>
+<p class="datetime">{% now "Y-m-d H:i:s" %}</p>
+
+{% endblock %}

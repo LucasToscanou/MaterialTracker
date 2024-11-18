@@ -1,7 +1,21 @@
 {% extends 'MaterialTrackerApp/item_base.html' %}
 {% load static %}
-{% block title %}Edit Item{% endblock %}
-{% block subtitle %}add item{% endblock %}
+
+{% block head %}
+<title>Edit Item</title>
+{% endblock %}
+
+{% block subtitle %}
+edit item
+{% endblock %}
+
+{%block photo %}
+{% if material.main_img %}
+  <img src="{{ material.main_img.url }}" alt="Material photo" class="img-thumbnail">
+{% else %}
+  <img src="{% static 'img/MaterialTrackerApp/generic_item.jpg' %}" alt="Material photo" class="img-thumbnail">
+{% endif %}
+{% endblock %}
 
 {%block field_reference %}
 value={{material.ref}}
