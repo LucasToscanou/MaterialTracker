@@ -59,12 +59,12 @@ function editSelection() {
         }),
     })
         .then(response => {
-        if (response.ok) {
-            // If expecting HTML, handle it without parsing as JSON
-            return response.text();
+        console.log(response);
+        if (response.redirected) {
+            window.location.href = response.url; // Navigate to the new page
         }
         else {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json(); // Only parse JSON if it's not a redirect
         }
     })
         .catch(error => console.error('Error:', error));
