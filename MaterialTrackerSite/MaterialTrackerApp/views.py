@@ -3,7 +3,7 @@ import csv
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import View
@@ -12,6 +12,8 @@ from django.contrib import messages
 from MaterialTrackerApp.models import *
 from django.urls import reverse
 from random import *
+import json
+from django.http import JsonResponse
 
 def index(request):
     return render(request, 'MaterialTrackerApp/index.html')
@@ -52,52 +54,88 @@ class InventoryView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
     
     def post(self, request):
+        if request.method == 'POST':
+            try:
+                data = json.loads(request.body)
+                action = data.get('action') 
+                selected_items = data.get('selectedItems', [])
 
-        if request.POST['action'] == 'request':
-            return render(request, 'MaterialTrackerApp/new_request_finish.html')
+                if action == 'delete':
+                    from .models import Material
+                    Material.objects.filter(id__in=selected_items).delete()
+                    return JsonResponse({'status': 'success', 'message': 'Items deleted successfully!'})
+
+                elif action == 'request':
+                    from .models import Material
+                    context = {
+                        'items': Material.objects.filter(id__in = selected_items),
+                    }
+                    return render(request, 'MaterialTrackerApp/new_request_finish.html', context)
+                
+                
+                elif action == 'edit':
+                    print(f"Action: {action}, Selected Items: {selected_items}")
+
+                    from .models import Material
+                    context = {
+                        'items': Material.objects.filter(id__in = selected_items),
+                    }
+                    print(f'Editing items: {context["items"]}')
+                    return HttpResponseRedirect(f"/edit-page/?ids={','.join(map(str, selected_items))}")
+                
+                else:
+                    return JsonResponse({'status': 'error', 'message': 'Unknown action'}, status=400)
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+        # if request.POST['action'] == 'request':
+        #     return render(request, 'MaterialTrackerApp/new_request_finish.html')
         
-        elif request.POST['action'] == 'edit':
-            print("Editing")
-            material_id = request.POST['id']
-            return redirect('MaterialTrackerApp:edit_item', pk=material_id)
+        # elif request.POST['action'] == 'edit':
+        #     print("Editing")
+        #     material_id = request.POST['id']
+        #     return redirect('MaterialTrackerApp:edit_item', pk=material_id)
 
-        elif  request.POST['action'] == 'delete':
-            print("Deleting")
-            print(request.POST['id'])
-            Material.objects.filter(pk=request.POST['id']).delete()
-            return redirect('MaterialTrackerApp:inventory')
+        # elif  request.POST['action'] == 'delete':
+        #     print("Deleting")
+        #     print(request.POST['id'])
+        #     Material.objects.filter(pk=request.POST['id']).delete()
+        #     return redirect('MaterialTrackerApp:inventory')
         
-        elif request.POST['action'] == 'restart_db':
-            from django.contrib import admin
-            import os
+        # elif request.POST['action'] == 'restart_db':
+        #     from django.contrib import admin
+        #     import os
 
-            projs = Project.objects.all()
-            locations = Location.objects.all()
-            capacities = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-            print("curr_dir = " + os.getcwd())
-            imgs = os.listdir("./MaterialTrackerApp/static/img/MaterialTrackerApp/material")
-            currencies = Currency.objects.all()
+        #     projs = Project.objects.all()
+        #     locations = Location.objects.all()
+        #     capacities = [20, 30, 40, 50, 60, 70, 80, 90, 100]
+        #     print("curr_dir = " + os.getcwd())
+        #     imgs = os.listdir("./MaterialTrackerApp/static/img/MaterialTrackerApp/material")
+        #     currencies = Currency.objects.all()
 
-            upper_bound = 100
-            Material.objects.all().delete()
-            for i in range(0, upper_bound):
-                Material.objects.create(
-                    ref=f"ABC_{i}",
-                    description=f"Description {i}",
-                    capacity=choice(capacities),
+        #     upper_bound = 100
+        #     Material.objects.all().delete()
+        #     for i in range(0, upper_bound):
+        #         Material.objects.create(
+        #             ref=f"ABC_{i}",
+        #             description=f"Description {i}",
+        #             capacity=choice(capacities),
                     
-                    project=choice(projs),
-                    main_img=choice(imgs),
-                    current_location=choice(locations),
-                    quality_exp_date=timezone.now(),
-                    cost=randrange(100, 10000),
-                    currency=choice(currencies),
+        #             project=choice(projs),
+        #             main_img=choice(imgs),
+        #             current_location=choice(locations),
+        #             quality_exp_date=timezone.now(),
+        #             cost=randrange(100, 10000),
+        #             currency=choice(currencies),
 
-                    created_at=timezone.now(),
-                    updated_at=timezone.now()
-                )
+        #             created_at=timezone.now(),
+        #             updated_at=timezone.now()
+        #         )
 
-            return redirect('MaterialTrackerApp:inventory')
+        #     return redirect('MaterialTrackerApp:inventory')
 
 
 @login_required
