@@ -8,22 +8,20 @@
   <title>New Request - Finish</title>
   <link rel="stylesheet" href="{% static 'css/MaterialTrackerApp/index.css' %}">
 
-  {% include 'MaterialTrackerApp/head.html' %}
 </head>
 
 <body>
   <div class="content">
-    {% include 'MaterialTrackerApp/links.html' %}
 
     <div class="d-flex align-items-center justify-content-between gap-3 mb-0 mx-5">
       <h1 class="display-5 fw-bolder text-body-emphasis me-auto">Inventory - new request</h1>
       <p class="datetime mb-0">Last update: {% now "Y-m-d H:i:s" %}</p>
 
-      <a href="{% url 'MaterialTrackerApp:new_request_view' %}">
+      <a href="">
         <button type="button" class="btn btn-secondary">Go back</button>
       </a>
 
-      <a href="{% url 'MaterialTrackerApp:inventory' %}">
+      <a href="">
         <button type="button" class="btn btn-danger">Cancel</button>
       </a>
     </div>
@@ -114,7 +112,7 @@
 
             <hr class="mb-4">
 
-            <a href="{% url 'MaterialTrackerApp:new_request_result' %}">
+            <a href="">
               <button class="w-100 btn btn-primary btn-lg btn-block" type="submit">Place request</button>
             </a>
           </form>
@@ -159,7 +157,6 @@
     </script>
 
 
-    {% include 'MaterialTrackerApp/footer.html' %}
   </div>
 </body>
 
