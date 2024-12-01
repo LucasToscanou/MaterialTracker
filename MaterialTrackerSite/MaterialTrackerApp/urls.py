@@ -15,7 +15,6 @@ urlpatterns = [
     path('add_item_success/', views.add_item_success, name='add_item_success'),
     path('add_item_fail/', views.add_item_fail, name='add_item_fail'),
     path('edit_item/<int:pk>', views.edit_item, name='edit_item'),
-    path('new_order/', views.NewOrderView.as_view(), name='new_order'),
 
 
 

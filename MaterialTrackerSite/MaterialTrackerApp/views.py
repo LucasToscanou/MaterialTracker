@@ -22,6 +22,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import status
 
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -36,6 +37,45 @@ class MaterialView(APIView):
         serializer = MTMaterialSerializer(queryset, many=True)
         print("serializer.data = " + str(serializer.data))
         return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Delete selected materials",
+        operation_description="Delete materials based on selected IDs",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'selectedItems': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_INTEGER),
+                    description='List of material IDs to delete'
+                )
+            }
+        ),
+        responses={
+            204: 'No Content',
+            404: 'Not Found'
+        }
+    )
+    def delete(self, request):
+        id_erro = ""
+        erro = False
+
+        selected_items = request.data.get("selectedItems", [])
+        print("Selected items:", selected_items)
+
+        for id in selected_items:
+            mat = Material.objects.filter(id=id).first()
+            if mat:
+                mat.delete()
+            else:
+                id_erro += str(id) + " "
+                erro = True
+
+        if erro:
+            return Response({'error': f'item(s) [{id_erro.strip()}] not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 def index(request):
     return render(request, 'MaterialTrackerApp/index.html')
@@ -277,11 +317,3 @@ def add_item_fail(request):
     return render(request, 'MaterialTrackerApp/add_item_fail.html')
 
 
-class NewOrderView(LoginRequiredMixin, View):
-    template_name = 'MaterialTrackerApp/new_request_finish.html'
-
-    def get(self, request):
-        return render(request, self.template_name)
-
-    def post(self, request):
-        pass

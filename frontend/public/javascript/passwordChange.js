@@ -1,6 +1,6 @@
 // Import constants
 import { backendAddress, tokenKeyword } from './constants.js';
-window.addEventListener('load', (evento) => {
+window.addEventListener('load', () => {
     document.getElementById('formulario').addEventListener('submit', async (event) => {
         event.preventDefault();
         const token = localStorage.getItem('token');

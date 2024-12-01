@@ -1,7 +1,7 @@
 import { backendAddress, tokenKeyword } from './constants.js';
 
-onload = (evento) => {
-    (document.getElementById('logout') as HTMLInputElement).addEventListener('click', (evento) => {
+onload = () => {
+    (document.getElementById('logout') as HTMLInputElement).addEventListener('click', () => {
         const token = localStorage.getItem('token');
         fetch(backendAddress + 'accounts/token-auth/', {
             method: 'DELETE',

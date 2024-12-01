@@ -1,8 +1,18 @@
 // Import constants
 import { backendAddress } from './constants.js';
 import { checkAuthentication } from './authUtils.js';
+import { clearSelection, updateSelectedCount, requestSelection, editSelection, deleteSelection } from './inventoryOperations.js';
 // // Example Data
 const columns = ["Ref", "Description", "Capacity", "Project", "Current Location", "Quality Exp Date", "Cost"];
+// Initialize page
+const initializePage = () => {
+    fillHeader();
+    populateColumns();
+    populateMaterials();
+    handleTableActions();
+};
+// Call initializePage when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", initializePage);
 const populateColumns = () => {
     const columnsRow = document.getElementById("columns-row");
     columns.forEach((col) => {
@@ -31,7 +41,13 @@ const populateColumns = () => {
 // Populate materials table
 const populateMaterials = () => {
     const materialsTbody = document.getElementById("materials-tbody");
-    fetch(backendAddress + "material/list/")
+    const token = localStorage.getItem("token");
+    fetch(backendAddress + "material/list/", {
+        method: "GET",
+        headers: {
+            "Authorization": `Token ${token}`,
+        },
+    })
         .then((response) => {
         if (!response.ok) {
             throw new Error("Failed to fetch materials");
@@ -43,7 +59,7 @@ const populateMaterials = () => {
             const row = document.createElement("tr");
             row.innerHTML = `
                     <td>
-                        <input type="checkbox" class="checkbox" value="${material.pk}">
+                        <input type="checkbox" class="checkbox" value="${material.id}">
                     </td>
                     <td>
                         <img src="${material.mainImg}" class="border rounded" style="height: 100px;" alt="Material Image">
@@ -56,9 +72,9 @@ const populateMaterials = () => {
                     <td>${material.qualityExpDate}</td>
                     <td>${material.cost} ${material.currency}</td>
                     <td>
-                        <button class="btn btn-secondary" data-action="edit" data-id="${material.pk}">Edit</button>
-                        <button class="btn btn-secondary" data-action="request" data-id="${material.pk}">Request</button>
-                        <button class="btn btn-secondary" data-action="delete" data-id="${material.pk}">Delete</button>
+                        <button class="btn btn-secondary" data-action="edit" data-id="${material.id}">Edit</button>
+                        <button class="btn btn-secondary" data-action="request" data-id="${material.id}">Request</button>
+                        <button class="btn btn-secondary" data-action="delete" data-id="${material.id}">Delete</button>
                     </td>`;
             materialsTbody.appendChild(row);
         });
@@ -67,52 +83,25 @@ const populateMaterials = () => {
         console.error("Error populating materials:", error);
     });
 };
+const reloadMaterialsTable = () => {
+    const materialsTbody = document.getElementById("materials-tbody");
+    materialsTbody.innerHTML = ""; // Clear the current table contents
+    populateMaterials(); // Repopulate the table
+};
 // Event listener for action buttons
 const handleTableActions = () => {
-    const materialsTbody = document.getElementById("materials-tbody");
-    materialsTbody.addEventListener("click", (event) => {
-        const target = event.target;
-        const action = target.getAttribute("data-action");
-        const id = target.getAttribute("data-id");
-        if (!action || !id)
-            return;
-        switch (action) {
-            case "edit":
-                editMaterial(Number(id));
-                break;
-            case "request":
-                requestMaterial(Number(id));
-                break;
-            case "delete":
-                deleteMaterial(Number(id));
-                break;
-            default:
-                console.warn("Unknown action:", action);
-        }
+    var _a, _b, _c, _d, _e;
+    (_a = document.getElementById("request-selection-btn")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", requestSelection);
+    (_b = document.getElementById("edit-selection-btn")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", editSelection);
+    (_c = document.getElementById("delete-selection-btn")) === null || _c === void 0 ? void 0 : _c.addEventListener("click", deleteSelection);
+    (_d = document.getElementById("request-selection")) === null || _d === void 0 ? void 0 : _d.addEventListener("change", requestSelection);
+    (_e = document.getElementById("clear-btn")) === null || _e === void 0 ? void 0 : _e.addEventListener("click", clearSelection);
+    const checkboxes = document.querySelectorAll('.checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
     });
 };
-// Define action handlers
-const editMaterial = (id) => {
-    console.log(`Edit material with ID: ${id}`);
-    // Logic for editing material
-};
-const requestMaterial = (id) => {
-    console.log(`Request material with ID: ${id}`);
-    // Logic for requesting material
-};
-const deleteMaterial = (id) => {
-    console.log(`Delete material with ID: ${id}`);
-    // Logic for deleting material
-};
-// Initialize page
-const initializePage = () => {
-    populateColumns();
-    populateMaterials();
-    handleTableActions();
-};
-// Call initializePage when the DOM is fully loaded
-document.addEventListener("DOMContentLoaded", initializePage);
-document.addEventListener("DOMContentLoaded", async () => {
+async function fillHeader() {
     const { isAuthenticated, username } = await checkAuthentication();
     // Profile elements
     const profileImage = document.getElementById("profileImage");
@@ -137,4 +126,5 @@ document.addEventListener("DOMContentLoaded", async () => {
             <li><a class="dropdown-item" href="/register.html">Register</a></li>
         `;
     }
-});
+}
+export { reloadMaterialsTable };

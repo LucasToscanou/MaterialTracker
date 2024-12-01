@@ -1,7 +1,7 @@
 // Import constants
 import { backendAddress } from './constants.js';
 import { checkAuthentication } from './authUtils.js';
-
+import { clearSelection, updateSelectedCount, requestSelection, editSelection, deleteSelection } from './inventoryOperations.js';
 
 // // Example Data
 const columns: string[] = ["Ref", "Description", "Capacity", "Project", "Current Location", "Quality Exp Date", "Cost"];
@@ -9,7 +9,7 @@ const columns: string[] = ["Ref", "Description", "Capacity", "Project", "Current
 
 // Define Material type
 type Material = {
-    pk: number;
+    id: number;
     mainImg: string;
     ref: string;
     description: string;
@@ -20,6 +20,20 @@ type Material = {
     cost: string;
     currency: string;
 };
+
+// Initialize page
+const initializePage = (): void => {
+    fillHeader();
+    populateColumns();
+
+    populateMaterials();
+    handleTableActions();
+};
+
+// Call initializePage when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", initializePage);
+
+
 
 const populateColumns = (): void => {
     const columnsRow = document.getElementById("columns-row")!;
@@ -51,8 +65,14 @@ const populateColumns = (): void => {
 // Populate materials table
 const populateMaterials = (): void => {
     const materialsTbody = document.getElementById("materials-tbody")!;
+    const token = localStorage.getItem("token");
 
-    fetch(backendAddress + "material/list/")
+    fetch(backendAddress + "material/list/", {
+        method: "GET",
+        headers: {
+            "Authorization": `Token ${token}`,
+        },
+    })
         .then((response) => {
             if (!response.ok) {
                 throw new Error("Failed to fetch materials");
@@ -64,7 +84,7 @@ const populateMaterials = (): void => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>
-                        <input type="checkbox" class="checkbox" value="${material.pk}">
+                        <input type="checkbox" class="checkbox" value="${material.id}">
                     </td>
                     <td>
                         <img src="${material.mainImg}" class="border rounded" style="height: 100px;" alt="Material Image">
@@ -77,9 +97,9 @@ const populateMaterials = (): void => {
                     <td>${material.qualityExpDate}</td>
                     <td>${material.cost} ${material.currency}</td>
                     <td>
-                        <button class="btn btn-secondary" data-action="edit" data-id="${material.pk}">Edit</button>
-                        <button class="btn btn-secondary" data-action="request" data-id="${material.pk}">Request</button>
-                        <button class="btn btn-secondary" data-action="delete" data-id="${material.pk}">Delete</button>
+                        <button class="btn btn-secondary" data-action="edit" data-id="${material.id}">Edit</button>
+                        <button class="btn btn-secondary" data-action="request" data-id="${material.id}">Request</button>
+                        <button class="btn btn-secondary" data-action="delete" data-id="${material.id}">Delete</button>
                     </td>`;
                 materialsTbody.appendChild(row);
             });
@@ -89,61 +109,30 @@ const populateMaterials = (): void => {
         });
 };
 
+const reloadMaterialsTable = (): void => {
+    const materialsTbody = document.getElementById("materials-tbody")!;
+    materialsTbody.innerHTML = ""; // Clear the current table contents
+    populateMaterials(); // Repopulate the table
+};
+
 // Event listener for action buttons
 const handleTableActions = (): void => {
-    const materialsTbody = document.getElementById("materials-tbody")!;
-    materialsTbody.addEventListener("click", (event: Event) => {
-        const target = event.target as HTMLElement;
-        const action = target.getAttribute("data-action");
-        const id = target.getAttribute("data-id");
+    document.getElementById("request-selection-btn")?.addEventListener("click", requestSelection);
+    document.getElementById("edit-selection-btn")?.addEventListener("click", editSelection);
+    document.getElementById("delete-selection-btn")?.addEventListener("click", deleteSelection);
+    document.getElementById("request-selection")?.addEventListener("change", requestSelection);
 
-        if (!action || !id) return;
+    document.getElementById("clear-btn")?.addEventListener("click", clearSelection);
 
-        switch (action) {
-            case "edit":
-                editMaterial(Number(id));
-                break;
-            case "request":
-                requestMaterial(Number(id));
-                break;
-            case "delete":
-                deleteMaterial(Number(id));
-                break;
-            default:
-                console.warn("Unknown action:", action);
-        }
+    const checkboxes = document.querySelectorAll<HTMLInputElement>('.checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
     });
 };
 
-// Define action handlers
-const editMaterial = (id: number): void => {
-    console.log(`Edit material with ID: ${id}`);
-    // Logic for editing material
-};
-
-const requestMaterial = (id: number): void => {
-    console.log(`Request material with ID: ${id}`);
-    // Logic for requesting material
-};
-
-const deleteMaterial = (id: number): void => {
-    console.log(`Delete material with ID: ${id}`);
-    // Logic for deleting material
-};
-
-// Initialize page
-const initializePage = (): void => {
-    populateColumns();
-    populateMaterials();
-    handleTableActions();
-};
-
-// Call initializePage when the DOM is fully loaded
-document.addEventListener("DOMContentLoaded", initializePage);
 
 
-
-document.addEventListener("DOMContentLoaded", async () => {
+async function fillHeader() {
     const { isAuthenticated, username } = await checkAuthentication();
 
     // Profile elements
@@ -171,4 +160,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             <li><a class="dropdown-item" href="/register.html">Register</a></li>
         `;
     }
-});
+}
+
+export { reloadMaterialsTable };
