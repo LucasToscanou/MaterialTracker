@@ -16,4 +16,9 @@ urlpatterns = [
     path('add_item_fail/', views.add_item_fail, name='add_item_fail'),
     path('edit_item/<int:pk>', views.edit_item, name='edit_item'),
     path('new_order/', views.NewOrderView.as_view(), name='new_order'),
+
+
+
+    path("material/list/", views.MaterialView.as_view(), name='material-list'),
+
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

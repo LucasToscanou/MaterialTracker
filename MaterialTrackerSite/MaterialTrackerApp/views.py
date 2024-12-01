@@ -14,6 +14,28 @@ from django.urls import reverse
 from random import *
 import json
 from django.http import JsonResponse
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.views import APIView
+from MaterialTrackerApp.serializers import MTMaterialSerializer
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+class MaterialView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Get all materials",
+        operation_description="Get all materials",
+        responses={200: MTMaterialSerializer(many=True)}
+    )
+    def get(self, request):
+        queryset = Material.objects.all()
+        serializer = MTMaterialSerializer(queryset, many=True)
+        print("serializer.data = " + str(serializer.data))
+        return Response(serializer.data)
 
 def index(request):
     return render(request, 'MaterialTrackerApp/index.html')
@@ -81,7 +103,7 @@ class InventoryView(LoginRequiredMixin, View):
                         'items': Material.objects.filter(id__in = selected_items),
                     }
                     print(f'Editing items: {context["items"]}')
-                    return HttpResponseRedirect(f"/edit-page/?ids={','.join(map(str, selected_items))}")
+                    return HttpResponseRedirect(f"MaterialTrackerApp:edit_item")
                 
                 else:
                     return JsonResponse({'status': 'error', 'message': 'Unknown action'}, status=400)
