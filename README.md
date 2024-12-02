@@ -21,10 +21,9 @@ Sistema para reutilização de materiais entre projetos de instalação de estru
 ## Funcionalidades Implementadas:
 - Login e página inicial.
 - Cadastro, deleção e alteração de localização de itens.
-- Reserva de itens e consulta de reservas.
-- Página de projeto com informações de itens e KPIs.
 
 ## Funcionalidades Pendentes:
+- Reserva de itens e consulta de reservas.
 - Filtragem avançada de itens.
 - Exibição completa de KPIs do projeto.
 - Transações financeiras para transferências de itens entre projetos.
