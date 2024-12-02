@@ -29,6 +29,4 @@ Sistema para reutilização de materiais entre projetos de instalação de estru
 - Transações financeiras para transferências de itens entre projetos.
 
 ## Componentes do Grupo:
-- **Lucas [Seu Nome]**: Backend (Django).
-- **[Nome do colega]**: Frontend.
-- **[Nome do colega]**: Banco de dados e autenticação.
+- **Lucas Toscano** (2110695)
